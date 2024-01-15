@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.sorting-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  
+  border: 1px solid black;
+  align-items: flex-end;
+  padding: 10px;
+}
+
+.rect {
+  border: 1px solid red;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex-grow:1;
+}
+
+.value{
+  font-weight: bold;
+}

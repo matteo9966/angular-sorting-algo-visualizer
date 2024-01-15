@@ -1,0 +1,7 @@
+.sorting-grid {
+  display: flex; 
+  gap: 10px;
+  *{
+    flex: 1;
+  }//TODO: replace with a css grid based on the number of selected sorting algorithms
+}
