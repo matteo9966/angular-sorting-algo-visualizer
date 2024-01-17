@@ -1,13 +1,16 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { Actions } from '../types/actions';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SortingService {
-  private sortingStatus$$ = new BehaviorSubject<'play' | 'pause'>('pause');
+  private sortingStatus$$ = new BehaviorSubject<Actions>(
+    'pause'
+  );
   constructor() {}
-  changeStatus(newStatus: 'play' | 'pause') {
+  changeStatus(newStatus: Actions) {
     this.sortingStatus$$.next(newStatus);
   }
 
@@ -19,5 +22,9 @@ export class SortingService {
 
   pauseSorting() {
     this.sortingStatus$$.next('pause');
+  }
+
+  resetSorting(){
+    this.sortingStatus$$.next('reset')
   }
 }

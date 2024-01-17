@@ -1,0 +1,1 @@
+export type Actions = 'play'|'pause'|'reset';

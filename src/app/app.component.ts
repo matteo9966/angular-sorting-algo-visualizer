@@ -37,4 +37,11 @@ export class AppComponent {
   centralizedPlay() {
     this.sortingService.playSorting();
   }
+
+  centralizedPause() {
+    this.sortingService.pauseSorting();
+  }
+  centralizedReset() {
+    this.sortingService.resetSorting();
+  }
 }
