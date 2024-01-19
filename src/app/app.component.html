@@ -1,7 +1,13 @@
 <div class="sorting-grid">
-  <app-sorting [sortingSequence]="sequence"></app-sorting>
-  <app-sorting [sortingSequence]="sequence"></app-sorting>
+  <app-sorting [sortingSequence]="[[]]" [animationQueue]="bubbleSortAnimationQueue"></app-sorting>
+  <!-- <app-sorting [sortingSequence]="sequence"></app-sorting> -->
 </div>
 <button (click)="centralizedPlay()">CENTRALIZED PLAY</button>
 <button (click)="centralizedPause()">CENTRALIZED PAUSE</button>
 <button (click)="centralizedReset()">CENTRALIZED RESET</button>
+<button (click)="createSequence()">CREATE SEQUENCE</button>
+<button (click)="play()">PLAY</button>
+<button (click)="pause()">PAUSE</button>
+<button (click)="createBubbleSortSequence()">CREATEBUBBLESORT QUEUE</button>
+
+<div>{{ tick$ | async }}</div>
