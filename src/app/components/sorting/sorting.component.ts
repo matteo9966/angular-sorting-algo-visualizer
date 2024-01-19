@@ -21,6 +21,7 @@ import {
   createRectangleAnimation,
 } from 'src/app/utils/animations/swapAnimation';
 import { calculateNormailizedHeight } from 'src/app/utils/calculateNormalizedHeight';
+import { BubbleSortDirective } from 'src/app/directives/bubble-sort.directive';
 
 function sleep(time: number) {
   return new Promise((r, _rej) => setTimeout(() => r(null), time));
@@ -29,13 +30,13 @@ function sleep(time: number) {
 @Component({
   selector: 'app-sorting',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,BubbleSortDirective],
   templateUrl: './sorting.component.html',
   styleUrls: ['./sorting.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SortingComponent implements AfterViewInit {
-  renderer = inject(Renderer2);
+  // renderer = inject(Renderer2);
   sortingService = inject(SortingService);
   status: Actions = 'pause';
   executing = false;
@@ -77,7 +78,8 @@ export class SortingComponent implements AfterViewInit {
   @Input() iterationColor = 'green';
   @Input() animationSpeed = 300;
 
-  constructor() {
+  constructor(private renderer:Renderer2) {
+    // TODO: pass this renderer instance to the function for 
     this.sortingService.tick$.subscribe((tick) => {
       this.animationSpeed = tick;
       const animationItem = this.animationQueue[this.queueIndex];
