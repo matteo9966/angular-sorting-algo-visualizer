@@ -3,7 +3,10 @@ import { BehaviorSubject } from 'rxjs';
 import { Actions } from '../types/actions';
 // import { bubbleSortRecursive, } from '@matteo-l-tommasi/sorting-algorithms';
 import { TickService } from './tick.service';
-import { bubbleSortRecursive } from '@matteo-l-tommasi/sorting-algorithms';
+import {
+  bubbleSort,
+  insertionSort,
+} from '@matteo-l-tommasi/sorting-algorithms';
 @Injectable({
   providedIn: 'root',
 })
@@ -48,7 +51,12 @@ export class SortingService {
 
   createBubbleSortAnimation() {
     const sequence = this.createSequence();
-    return bubbleSortRecursive(sequence);
+    return bubbleSort(sequence);
+  }
+
+  createInsertionSortAnimation() {
+    const sequence = this.createSequence();
+    return insertionSort(sequence);
   }
 }
 

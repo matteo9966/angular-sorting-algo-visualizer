@@ -2,7 +2,12 @@ import { Component, Renderer2, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SortingComponent } from './components/sorting/sorting.component';
 import { SortingService } from './services/sorting.service';
-import { AnimationQueue } from '@matteo-l-tommasi/sorting-algorithms';
+import {
+  AnimationQueue,
+  BubbleSortAnimation,
+  InsertionSortAnimation,
+  SortingAnimation,
+} from '@matteo-l-tommasi/sorting-algorithms';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -62,8 +67,17 @@ export class AppComponent {
   }
 
   bubbleSortAnimationQueue: AnimationQueue = [];
+  insetionSortAnimationQueue: AnimationQueue = [];
+
+  animationQueue: BubbleSortAnimation[] | InsertionSortAnimation[] = [];
+  sortingType: SortingAnimation['sortType'] | null = null;
   createBubbleSortSequence() {
-    this.bubbleSortAnimationQueue =
-      this.sortingService.createBubbleSortAnimation();
+    this.animationQueue = this.sortingService.createBubbleSortAnimation();
+    this.sortingType = 'bubble-sort';
+  }
+
+  createInsertionSortSequence() {
+    this.animationQueue = this.sortingService.createInsertionSortAnimation();
+    this.sortingType = 'insertion-sort';
   }
 }

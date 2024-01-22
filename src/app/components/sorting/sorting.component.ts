@@ -12,8 +12,8 @@ import { CommonModule } from '@angular/common';
 import { SortingService } from 'src/app/services/sorting.service';
 import { Actions } from 'src/app/types/actions';
 import {
-  AnimationElement,
   AnimationQueue,
+  SortingAnimation,
 } from '@matteo-l-tommasi/sorting-algorithms';
 import { iterationAnimation } from 'src/app/utils/animations/iterationAnimation';
 import {
@@ -21,7 +21,6 @@ import {
   createRectangleAnimation,
 } from 'src/app/utils/animations/swapAnimation';
 import { calculateNormailizedHeight } from 'src/app/utils/calculateNormalizedHeight';
-import { BubbleSortDirective } from 'src/app/directives/bubble-sort.directive';
 
 function sleep(time: number) {
   return new Promise((r, _rej) => setTimeout(() => r(null), time));
@@ -30,7 +29,7 @@ function sleep(time: number) {
 @Component({
   selector: 'app-sorting',
   standalone: true,
-  imports: [CommonModule,BubbleSortDirective],
+  imports: [CommonModule],
   templateUrl: './sorting.component.html',
   styleUrls: ['./sorting.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -77,37 +76,122 @@ export class SortingComponent implements AfterViewInit {
   @Input() swapColor = 'magenta';
   @Input() iterationColor = 'green';
   @Input() animationSpeed = 300;
+  @Input({ required: true }) sortingAlgorithm!: SortingAnimation['sortType'];
 
-  constructor(private renderer:Renderer2) {
-    // TODO: pass this renderer instance to the function for 
+  ngOnInit() {
+    switch (this.sortingAlgorithm) {
+      case 'bubble-sort':
+        this.animationFunction = this.animate;
+        break;
+      case 'insertion-sort':
+        this.animationFunction = this.animateInsertionSort;
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  animationFunction(_tick: number, _animationQueue: AnimationQueue) {}
+
+  constructor(private renderer: Renderer2) {
+    // TODO: pass this renderer instance to the function for
     this.sortingService.tick$.subscribe((tick) => {
-      this.animationSpeed = tick;
-      const animationItem = this.animationQueue[this.queueIndex];
-      if (!animationItem) {
-        this.executing = false;
-        this.queueIndex = 0;
-        this.sortingService.pause();
-        return;
-      }
-      this.executing = true;
-      switch (animationItem.animationFn) {
-        case 'itarationAnimation':
-          this.iterationRectangleAnimation(
-            this.rectangleDivsList,
-            animationItem.currentIndex,
-            tick,
-            this.iterationColor
-          ).play();
-          break;
-        case 'swapAnimation':
-          this.animateRectangles(animationItem.listStatus);
-          break;
+      this.animationFunction(tick, this.animationQueue);
+      // this.animationSpeed = tick;
+      // const animationItem = this.animationQueue[this.queueIndex];
+      // if (!animationItem) {
+      //   this.executing = false;
+      //   this.queueIndex = 0;
+      //   this.sortingService.pause();
+      //   return;
+      // }
+      // this.executing = true;
+      // switch (animationItem.animationFn) {
+      //   case 'itarationAnimation':
+      //     this.iterationRectangleAnimation(
+      //       this.rectangleDivsList,
+      //       animationItem.currentIndex,
+      //       tick,
+      //       this.iterationColor
+      //     ).play();
+      //     break;
+      //   case 'swapAnimation':
+      //     this.animateRectangles(animationItem.listStatus);
+      //     break;
 
-        default:
-          break;
-      }
-      this.queueIndex++;
+      //   default:
+      //     break;
+      // }
+      // this.queueIndex++;
     });
+  }
+
+  animate(tick: number, animationQueue: AnimationQueue) {
+    const animationItem = animationQueue[this.queueIndex];
+    if (!animationItem) {
+      this.executing = false;
+      this.queueIndex = 0;
+      this.sortingService.pause();
+      return;
+    }
+    this.executing = true;
+    switch (animationItem.animationFn) {
+      case 'itarationAnimation':
+        this.iterationRectangleAnimation(
+          this.rectangleDivsList,
+          animationItem.currentIndex,
+          tick,
+          this.iterationColor
+        ).play();
+        break;
+      case 'swapAnimation':
+        this.animateRectangles(animationItem.listStatus);
+        break;
+
+      default:
+        break;
+    }
+    this.queueIndex++;
+  }
+
+  animateInsertionSort(tick: number, animationQueue: AnimationQueue) {
+    const animationItem = animationQueue[this.queueIndex];
+    if (!animationItem || animationItem.sortType !== 'insertion-sort') return;
+    const animationFn = animationItem.animationFn;
+    switch (animationFn) {
+      case 'iterationAnimation':
+        this.resetDefaultColor();
+        this.highlightCurrentInsertionIndex(
+          this.rectangleDivsList,
+          animationItem.currentIndex
+        );
+        this.iterationRectangleAnimation(
+          this.rectangleDivsList,
+          animationItem.iterationIndex,
+          tick,
+          this.iterationColor
+        );
+        break;
+      case 'swapAnimation':
+        this.resetDefaultColor();
+        this.animateRectangles(animationItem.listStatus);
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  currentDivListHighlightColor = 'purple';
+  highlightCurrentInsertionIndex(divsList: HTMLDivElement[], index: number) {
+    const currentDiv = divsList[index];
+    if (!currentDiv) return;
+    this.renderer.setStyle(
+      currentDiv,
+      'background',
+      this.currentDivListHighlightColor
+    );
   }
 
   ngAfterViewInit(): void {
@@ -183,7 +267,6 @@ export class SortingComponent implements AfterViewInit {
     }
   }
 
-
   iterationRectangleAnimation(
     divs: HTMLDivElement[],
     index: number,
@@ -193,8 +276,9 @@ export class SortingComponent implements AfterViewInit {
     return iterationAnimation(divs, index, tick, iterationColor);
   }
 
+  //this function is for the bubblesort
   async animateRectangle(rectDiv: HTMLDivElement, value: number) {
-    if(!this.maxValue) return
+    if (!this.maxValue) return;
     await animateRectangle(
       rectDiv,
       value,
@@ -230,7 +314,6 @@ export class SortingComponent implements AfterViewInit {
       this.updateRectangleTextValue(d, heights[i]);
     });
   }
-
 
   /**
    * @description instead of using animation.commitChanges() I use renderer to apply final styles to the recangle
