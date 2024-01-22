@@ -74,10 +74,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "angular-sorting-algo-visualizer:build:production"
+              "buildTarget": "angular-sorting-algo-visualizer:build:production"
             },
             "development": {
-              "browserTarget": "angular-sorting-algo-visualizer:build:development"
+              "buildTarget": "angular-sorting-algo-visualizer:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -85,7 +85,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "angular-sorting-algo-visualizer:build"
+            "buildTarget": "angular-sorting-algo-visualizer:build"
           }
         },
         "test": {

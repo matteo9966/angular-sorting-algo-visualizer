@@ -2,8 +2,9 @@
   @if(sortingType){
 
   <app-sorting
-    [sortingSequence]="[[]]"
-    [animationQueue]="sortingType"
+    
+    [animationQueue]="animationQueue"
+    [sortingAlgorithm]="sortingType"
   ></app-sorting>
   }
   <!-- <app-sorting [sortingSequence]="sequence"></app-sorting> -->

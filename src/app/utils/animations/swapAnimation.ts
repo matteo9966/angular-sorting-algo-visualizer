@@ -25,9 +25,9 @@ export function createRectangleAnimation(
     nextHeight
   );
 
-  if (hasSameValue(rect, nextHeight)) {
-    return null;
-  }
+  // if (hasSameValue(rect, nextHeight)) {
+  //   return null;
+  // }
 
   const keyFrames = new KeyframeEffect(
     rect,
@@ -58,7 +58,6 @@ export async function animateRectangle(
   swapColor: string,
   tick: number
 ) {
-  if (!maxValue) return;
   const animation = createRectangleAnimation(
     rectDiv,
     value,

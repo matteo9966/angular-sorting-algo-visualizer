@@ -41,7 +41,7 @@ export class SortingService {
 
   sequence = signal<number[][]>([]);
   insertSequence(list: number[]) {}
-  createSequence(size = 10, min = 1, max = 200) {
+  createSequence(size = 15, min = 1, max = 200) {
     const random: number[] = [];
     for (let i = 0; i < size; i++) {
       random.push(randomInteger(min, max));

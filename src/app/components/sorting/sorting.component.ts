@@ -21,6 +21,7 @@ import {
   createRectangleAnimation,
 } from 'src/app/utils/animations/swapAnimation';
 import { calculateNormailizedHeight } from 'src/app/utils/calculateNormalizedHeight';
+import { hasSameValue } from 'src/app/utils/hasSameValue';
 
 function sleep(time: number) {
   return new Promise((r, _rej) => setTimeout(() => r(null), time));
@@ -43,23 +44,12 @@ export class SortingComponent implements AfterViewInit {
   rectangleDivsList: HTMLDivElement[] = [];
   maxValue: number | null = null;
   currentIndex = 0;
-  private _sortingSequence: number[][] = [];
-
-  @Input({ required: true })
-  set sortingSequence(sequence: number[][]) {
-    this._sortingSequence = sequence;
-    this.maxValue = Math.max(...this._sortingSequence[0]);
-  }
-  get sortingSequence() {
-    return this._sortingSequence;
-  }
-
   #animationQueue: AnimationQueue = [];
   queueIndex = 0;
 
   @Input()
   set animationQueue(animationQueue: AnimationQueue) {
-    this.createRectangles;
+    console.log(animationQueue);
     this.#animationQueue = animationQueue;
     this.maxValue = Math.max(...(animationQueue[0]?.listStatus || []));
     this.rectangleDivsList = this.createRectangles(
@@ -79,6 +69,7 @@ export class SortingComponent implements AfterViewInit {
   @Input({ required: true }) sortingAlgorithm!: SortingAnimation['sortType'];
 
   ngOnInit() {
+    //this can olso change dinamically
     switch (this.sortingAlgorithm) {
       case 'bubble-sort':
         this.animationFunction = this.animate;
@@ -95,35 +86,8 @@ export class SortingComponent implements AfterViewInit {
   animationFunction(_tick: number, _animationQueue: AnimationQueue) {}
 
   constructor(private renderer: Renderer2) {
-    // TODO: pass this renderer instance to the function for
     this.sortingService.tick$.subscribe((tick) => {
       this.animationFunction(tick, this.animationQueue);
-      // this.animationSpeed = tick;
-      // const animationItem = this.animationQueue[this.queueIndex];
-      // if (!animationItem) {
-      //   this.executing = false;
-      //   this.queueIndex = 0;
-      //   this.sortingService.pause();
-      //   return;
-      // }
-      // this.executing = true;
-      // switch (animationItem.animationFn) {
-      //   case 'itarationAnimation':
-      //     this.iterationRectangleAnimation(
-      //       this.rectangleDivsList,
-      //       animationItem.currentIndex,
-      //       tick,
-      //       this.iterationColor
-      //     ).play();
-      //     break;
-      //   case 'swapAnimation':
-      //     this.animateRectangles(animationItem.listStatus);
-      //     break;
-
-      //   default:
-      //     break;
-      // }
-      // this.queueIndex++;
     });
   }
 
@@ -146,7 +110,7 @@ export class SortingComponent implements AfterViewInit {
         ).play();
         break;
       case 'swapAnimation':
-        this.animateRectangles(animationItem.listStatus);
+        this.bubbleSortSwapRectanglesAnimation(animationItem.listStatus);
         break;
 
       default:
@@ -157,6 +121,13 @@ export class SortingComponent implements AfterViewInit {
 
   animateInsertionSort(tick: number, animationQueue: AnimationQueue) {
     const animationItem = animationQueue[this.queueIndex];
+    if (!animationItem) {
+      this.executing = false;
+      this.queueIndex = 0;
+      this.sortingService.pause();
+      return;
+    }
+    this.executing = true;
     if (!animationItem || animationItem.sortType !== 'insertion-sort') return;
     const animationFn = animationItem.animationFn;
     switch (animationFn) {
@@ -171,16 +142,25 @@ export class SortingComponent implements AfterViewInit {
           animationItem.iterationIndex,
           tick,
           this.iterationColor
-        );
+        ).play();
         break;
       case 'swapAnimation':
         this.resetDefaultColor();
-        this.animateRectangles(animationItem.listStatus);
+        this.highlightCurrentInsertionIndex(
+          this.rectangleDivsList,
+          animationItem.currentIndex
+        );
+        // this.animateRectangles(animationItem.listStatus);
+        this.insertionSortSwapRectanglesAnimation(
+          animationItem,
+          this.rectangleDivsList
+        );
         break;
 
       default:
         break;
     }
+    this.queueIndex++;
   }
 
   currentDivListHighlightColor = 'purple';
@@ -195,7 +175,7 @@ export class SortingComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.rectangleDivsList = this.createRectangles(this.sortingSequence[0]);
+    // this.rectangleDivsList = this.createRectangles(this.sortingSequence[0]);
   }
 
   @ViewChild('container', { static: true })
@@ -267,6 +247,79 @@ export class SortingComponent implements AfterViewInit {
     }
   }
 
+  async insertionSortSwapRectanglesAnimation(
+    animation: SortingAnimation,
+    rectDivs: HTMLDivElement[]
+  ) {
+    if (
+      !animation ||
+      animation.sortType !== 'insertion-sort' ||
+      !this.maxValue
+    ) {
+      return;
+    }
+
+    const swapRec1 = rectDivs[animation.iterationIndex];
+    const swapRec1Val = animation.listStatus[animation.iterationIndex];
+    const swapRec2 = rectDivs[animation.iterationIndex+1];
+    const swapRec2Val = animation.listStatus[animation.iterationIndex+1];
+    await Promise.all([
+      animateRectangle(
+        swapRec1,
+        swapRec1Val,
+        this.maxValue,
+        this.containerHeight,
+        this.swapColor,
+        this.animationSpeed
+      ),
+      animateRectangle(
+        swapRec2,
+        swapRec2Val,
+        this.maxValue,
+        this.containerHeight,
+        this.swapColor,
+        this.animationSpeed
+      ),
+    ]);
+//something does not work here!!
+    this.commitNormalizedHeightToRect(swapRec1, swapRec2Val);
+    this.commitNormalizedHeightToRect(swapRec2, swapRec1Val);
+    this.updateRectangleTextValue(swapRec1, swapRec1Val);
+    this.updateRectangleTextValue(swapRec2, swapRec2Val);
+
+ 
+  }
+
+  bubbleSortSwapRectanglesAnimation(element: number[]) {
+    if (!element) {
+      return;
+    }
+    for (let j = 0; j < element.length; j++) {
+      const rectDiv = this.rectangleDivsList[j];
+      const value = element[j];
+      this.bubbleSortSwapRectangleAnimation(rectDiv, value);
+      this.updateRectangleTextValue(rectDiv, value);
+    }
+  }
+
+  async bubbleSortSwapRectangleAnimation(
+    rectDiv: HTMLDivElement,
+    value: number
+  ) {
+    if (!this.maxValue) return;
+    const hasSameHeight = hasSameValue(rectDiv, value);
+    if (hasSameHeight) return;
+    await animateRectangle(
+      rectDiv,
+      value,
+      this.maxValue,
+      this.containerHeight,
+      this.swapColor,
+      this.animationSpeed
+    );
+    this.commitNormalizedHeightToRect(rectDiv, value);
+  }
+
   iterationRectangleAnimation(
     divs: HTMLDivElement[],
     index: number,
@@ -287,7 +340,6 @@ export class SortingComponent implements AfterViewInit {
       this.swapColor,
       this.animationSpeed
     );
-    if (!this.maxValue) return;
 
     this.commitNormalizedHeightToRect(rectDiv, value);
   }
@@ -342,22 +394,5 @@ export class SortingComponent implements AfterViewInit {
    */
   setValueAttribute(rect: HTMLDivElement, value: number) {
     this.renderer.setAttribute(rect, 'data-value', String(value));
-  }
-
-  resetHeightsOfRectangles() {
-    if (
-      !this.rectangleDivsList ||
-      !this.sortingSequence[0] ||
-      this.rectangleDivsList.length !== this.sortingSequence[0].length
-    ) {
-      console.error(
-        'values are mismatched!',
-        'divs number:',
-        this.rectangleDivsList.length,
-        'sorting sequence length:',
-        this.sortingSequence[0].length
-      );
-    }
-    this.setHeights(this.rectangleDivsList, this.sortingSequence[0]);
   }
 }

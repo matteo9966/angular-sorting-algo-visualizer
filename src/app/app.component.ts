@@ -1,17 +1,12 @@
 import { Component, Renderer2, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { SortingComponent } from './components/sorting/sorting.component';
 import { SortingService } from './services/sorting.service';
-import {
-  AnimationQueue,
-  BubbleSortAnimation,
-  InsertionSortAnimation,
-  SortingAnimation,
-} from '@matteo-l-tommasi/sorting-algorithms';
+import { AnimationQueue,BubbleSortAnimation,InsertionSortAnimation,SortingAnimation } from '@matteo-l-tommasi/sorting-algorithms';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, SortingComponent],
+  imports: [ SortingComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
@@ -78,6 +73,7 @@ export class AppComponent {
 
   createInsertionSortSequence() {
     this.animationQueue = this.sortingService.createInsertionSortAnimation();
+    console.log(this.animationQueue);
     this.sortingType = 'insertion-sort';
   }
 }
