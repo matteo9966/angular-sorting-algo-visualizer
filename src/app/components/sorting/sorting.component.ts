@@ -120,6 +120,7 @@ export class SortingComponent implements AfterViewInit {
   }
 
   animateInsertionSort(tick: number, animationQueue: AnimationQueue) {
+    if (!this.maxValue) return;
     const animationItem = animationQueue[this.queueIndex];
     if (!animationItem) {
       this.executing = false;
@@ -128,7 +129,8 @@ export class SortingComponent implements AfterViewInit {
       return;
     }
     this.executing = true;
-    if (!animationItem || animationItem.sortType !== 'insertion-sort') return;
+    if (animationItem.sortType !== 'insertion-sort') return;
+
     const animationFn = animationItem.animationFn;
     switch (animationFn) {
       case 'iterationAnimation':
@@ -143,17 +145,34 @@ export class SortingComponent implements AfterViewInit {
           tick,
           this.iterationColor
         ).play();
+
         break;
-      case 'swapAnimation':
+      case 'growAnimation':
         this.resetDefaultColor();
         this.highlightCurrentInsertionIndex(
           this.rectangleDivsList,
           animationItem.currentIndex
         );
-        // this.animateRectangles(animationItem.listStatus);
-        this.insertionSortSwapRectanglesAnimation(
+
+        this.insertionSortGrowAnimation(
           animationItem,
-          this.rectangleDivsList
+          this.rectangleDivsList,
+          this.maxValue,
+          tick
+        );
+        break;
+
+      case 'settleAnimation':
+        this.resetDefaultColor();
+        this.highlightCurrentInsertionIndex(
+          this.rectangleDivsList,
+          animationItem.currentIndex
+        );
+        this.insertionSortSettleAnimation(
+          animationItem,
+          this.rectangleDivsList,
+          this.maxValue,
+          tick
         );
         break;
 
@@ -247,47 +266,66 @@ export class SortingComponent implements AfterViewInit {
     }
   }
 
-  async insertionSortSwapRectanglesAnimation(
+  async insertionSortGrowAnimation(
     animation: SortingAnimation,
-    rectDivs: HTMLDivElement[]
+    rectDivs: HTMLDivElement[],
+    maxValue: number,
+    tick: number
   ) {
-    if (
-      !animation ||
-      animation.sortType !== 'insertion-sort' ||
-      !this.maxValue
-    ) {
-      return;
-    }
-
-    const swapRec1 = rectDivs[animation.iterationIndex];
-    const swapRec1Val = animation.listStatus[animation.iterationIndex];
-    const swapRec2 = rectDivs[animation.iterationIndex+1];
-    const swapRec2Val = animation.listStatus[animation.iterationIndex+1];
+    if (animation.sortType !== 'insertion-sort') return;
+    // const index1 = animation.currentIndex;
+    const index2 = animation.iterationIndex + 1;
+    // const nextHeight1 = animation.listStatus[index1];
+    const nextHeight2 = animation.listStatus[index2];
+    // console.log({ index1, index2, nextHeight1, nextHeight2 });
     await Promise.all([
+      // animateRectangle(
+      // rectDivs[index1],
+      // nextHeight1,
+      // maxValue,
+      // this.containerHeight,
+      // this.swapColor,
+      // tick
+      // ),
       animateRectangle(
-        swapRec1,
-        swapRec1Val,
-        this.maxValue,
+        rectDivs[index2],
+        nextHeight2,
+        maxValue,
         this.containerHeight,
         this.swapColor,
-        this.animationSpeed
-      ),
-      animateRectangle(
-        swapRec2,
-        swapRec2Val,
-        this.maxValue,
-        this.containerHeight,
-        this.swapColor,
-        this.animationSpeed
+        tick
       ),
     ]);
-//something does not work here!!
-    this.commitNormalizedHeightToRect(swapRec1, swapRec2Val);
-    this.commitNormalizedHeightToRect(swapRec2, swapRec1Val);
-    this.updateRectangleTextValue(swapRec1, swapRec1Val);
-    this.updateRectangleTextValue(swapRec2, swapRec2Val);
+    // this.commitNormalizedHeightToRect(rectDivs[index1], nextHeight1);
+    // this.updateRectangleTextValue(rectDivs[index1], nextHeight1);
+    this.commitNormalizedHeightToRect(rectDivs[index2], nextHeight2);
+    this.updateRectangleTextValue(rectDivs[index2], nextHeight2);
+  }
 
- 
+  async insertionSortSettleAnimation(
+    animation: SortingAnimation,
+    rectDivs: HTMLDivElement[],
+    maxValue: number,
+    tick: number
+  ) {
+    if (animation.sortType !== 'insertion-sort') return;
+    await animateRectangle(
+      rectDivs[animation.iterationIndex],
+      animation.listStatus[animation.iterationIndex],
+      maxValue,
+      this.containerHeight,
+      'blue',
+      tick
+    );
+
+    this.commitNormalizedHeightToRect(
+      rectDivs[animation.iterationIndex],
+      animation.listStatus[animation.iterationIndex]
+    );
+    this.updateRectangleTextValue(
+      rectDivs[animation.iterationIndex],
+      animation.listStatus[animation.iterationIndex]
+    );
   }
 
   bubbleSortSwapRectanglesAnimation(element: number[]) {
