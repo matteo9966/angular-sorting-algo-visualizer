@@ -9,17 +9,13 @@ import {
   AfterViewInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SortingService } from 'src/app/services/sorting.service';
-import { Actions } from 'src/app/types/actions';
+import { SortingService } from 'src/app/core/services/sorting.service';
 import {
   AnimationQueue,
   SortingAnimation,
 } from '@matteo-l-tommasi/sorting-algorithms';
 import { iterationAnimation } from 'src/app/utils/animations/iterationAnimation';
-import {
-  animateRectangle,
-  createRectangleAnimation,
-} from 'src/app/utils/animations/swapAnimation';
+import { animateRectangle } from 'src/app/utils/animations/swapAnimation';
 import { calculateNormailizedHeight } from 'src/app/utils/calculateNormalizedHeight';
 import { hasSameValue } from 'src/app/utils/hasSameValue';
 
@@ -36,26 +32,23 @@ function sleep(time: number) {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SortingComponent implements AfterViewInit {
-  // renderer = inject(Renderer2);
   sortingService = inject(SortingService);
-  status: Actions = 'pause';
   executing = false;
-  currentStepIndex = 0;
   rectangleDivsList: HTMLDivElement[] = [];
   maxValue: number | null = null;
-  currentIndex = 0;
   #animationQueue: AnimationQueue = [];
+  #sortingAlgorithm!: SortingAnimation['sortType'];
   queueIndex = 0;
 
   @Input()
   set animationQueue(animationQueue: AnimationQueue) {
-    console.log(animationQueue);
     this.#animationQueue = animationQueue;
     this.maxValue = Math.max(...(animationQueue[0]?.listStatus || []));
     this.rectangleDivsList = this.createRectangles(
-      animationQueue[0]?.listStatus || []
+      animationQueue[0]?.listStatus || [],
+      this.renderer
     );
-    this.initRectangles(animationQueue[0]?.listStatus || []);
+    this.initRectangles(animationQueue[0]?.listStatus || [], this.renderer);
   }
   get animationQueue() {
     return this.#animationQueue;
@@ -66,10 +59,11 @@ export class SortingComponent implements AfterViewInit {
   @Input() swapColor = 'magenta';
   @Input() iterationColor = 'green';
   @Input() animationSpeed = 300;
-  @Input({ required: true }) sortingAlgorithm!: SortingAnimation['sortType'];
+  @Input({ required: true }) set sortingAlgorithm(
+    sortingAlgorithm: SortingAnimation['sortType']
+  ) {
+    this.#sortingAlgorithm = sortingAlgorithm;
 
-  ngOnInit() {
-    //this can olso change dinamically
     switch (this.sortingAlgorithm) {
       case 'bubble-sort':
         this.animationFunction = this.animate;
@@ -83,15 +77,21 @@ export class SortingComponent implements AfterViewInit {
     }
   }
 
-  animationFunction(_tick: number, _animationQueue: AnimationQueue) {}
+  ngOnInit() {}
+
+  animationFunction(
+    _tick: number,
+    _animationQueue: AnimationQueue,
+    _renderer: Renderer2
+  ) {}
 
   constructor(private renderer: Renderer2) {
     this.sortingService.tick$.subscribe((tick) => {
-      this.animationFunction(tick, this.animationQueue);
+      this.animationFunction(tick, this.animationQueue, renderer);
     });
   }
 
-  animate(tick: number, animationQueue: AnimationQueue) {
+  animate(tick: number, animationQueue: AnimationQueue, renderer: Renderer2) {
     const animationItem = animationQueue[this.queueIndex];
     if (!animationItem) {
       this.executing = false;
@@ -110,7 +110,11 @@ export class SortingComponent implements AfterViewInit {
         ).play();
         break;
       case 'swapAnimation':
-        this.bubbleSortSwapRectanglesAnimation(animationItem.listStatus);
+        this.bubbleSortSwapRectanglesAnimation(
+          animationItem.listStatus,
+          tick,
+          renderer
+        );
         break;
 
       default:
@@ -119,7 +123,11 @@ export class SortingComponent implements AfterViewInit {
     this.queueIndex++;
   }
 
-  animateInsertionSort(tick: number, animationQueue: AnimationQueue) {
+  animateInsertionSort(
+    tick: number,
+    animationQueue: AnimationQueue,
+    renderer: Renderer2
+  ) {
     if (!this.maxValue) return;
     const animationItem = animationQueue[this.queueIndex];
     if (!animationItem) {
@@ -137,7 +145,8 @@ export class SortingComponent implements AfterViewInit {
         this.resetDefaultColor();
         this.highlightCurrentInsertionIndex(
           this.rectangleDivsList,
-          animationItem.currentIndex
+          animationItem.currentIndex,
+          renderer
         );
         this.iterationRectangleAnimation(
           this.rectangleDivsList,
@@ -151,14 +160,16 @@ export class SortingComponent implements AfterViewInit {
         this.resetDefaultColor();
         this.highlightCurrentInsertionIndex(
           this.rectangleDivsList,
-          animationItem.currentIndex
+          animationItem.currentIndex,
+          renderer
         );
 
         this.insertionSortGrowAnimation(
           animationItem,
           this.rectangleDivsList,
           this.maxValue,
-          tick
+          tick,
+          renderer
         );
         break;
 
@@ -166,13 +177,15 @@ export class SortingComponent implements AfterViewInit {
         this.resetDefaultColor();
         this.highlightCurrentInsertionIndex(
           this.rectangleDivsList,
-          animationItem.currentIndex
+          animationItem.currentIndex,
+          renderer
         );
         this.insertionSortSettleAnimation(
           animationItem,
           this.rectangleDivsList,
           this.maxValue,
-          tick
+          tick,
+          renderer
         );
         break;
 
@@ -183,10 +196,14 @@ export class SortingComponent implements AfterViewInit {
   }
 
   currentDivListHighlightColor = 'purple';
-  highlightCurrentInsertionIndex(divsList: HTMLDivElement[], index: number) {
+  highlightCurrentInsertionIndex(
+    divsList: HTMLDivElement[],
+    index: number,
+    renderer: Renderer2
+  ) {
     const currentDiv = divsList[index];
     if (!currentDiv) return;
-    this.renderer.setStyle(
+    renderer.setStyle(
       currentDiv,
       'background',
       this.currentDivListHighlightColor
@@ -200,77 +217,70 @@ export class SortingComponent implements AfterViewInit {
   @ViewChild('container', { static: true })
   container!: ElementRef<HTMLDivElement>;
 
-  initRectangles(values: number[]) {
-    this.rectangleDivsList = this.createRectangles(values);
+  initRectangles(values: number[], renderer: Renderer2) {
+    this.rectangleDivsList = this.createRectangles(values, renderer);
   }
 
-  createRectangles(values: number[]) {
+  createRectangles(values: number[], renderer: Renderer2) {
     const rectangleDivs: HTMLDivElement[] = [];
-    this.removeAllRectangles();
+    this.removeAllRectangles(renderer);
     if (!this.maxValue) {
       return [];
     }
     for (const value of values) {
-      const rectangle = this.createRectangle(value, this.maxValue);
-      this.renderer.appendChild(this.container.nativeElement, rectangle);
+      const rectangle = this.createRectangle(value, this.maxValue, renderer);
+      renderer.appendChild(this.container.nativeElement, rectangle);
       rectangleDivs.push(rectangle);
     }
     return rectangleDivs;
   }
 
-  createRectangle(value: number, maxValue: number) {
+  createRectangle(value: number, maxValue: number, renderer: Renderer2) {
     const rectangleHeight = calculateNormailizedHeight(
       this.containerHeight,
       maxValue,
       value
     );
-    const rectangle = this.renderer.createElement('div');
-    this.updateRectangleTextValue(rectangle, value);
-    this.renderer.setStyle(rectangle, 'height', `${rectangleHeight}px`);
-    this.renderer.addClass(rectangle, 'rect');
+    const rectangle = renderer.createElement('div');
+    this.updateRectangleTextValue(rectangle, value, renderer);
+    renderer.setStyle(rectangle, 'height', `${rectangleHeight}px`);
+    renderer.addClass(rectangle, 'rect');
     this.setValueAttribute(rectangle, value);
     return rectangle as HTMLDivElement;
   }
 
-  removeAllRectangles() {
+  removeAllRectangles(renderer: Renderer2) {
     if (!this.container || !this.container.nativeElement) {
       return;
     }
     while (this.container.nativeElement.firstChild) {
-      this.renderer.removeChild(
+      renderer.removeChild(
         this.container.nativeElement,
         this.container.nativeElement.firstChild
       );
     }
   }
 
-  updateRectangleTextValue(rectangle: HTMLDivElement, value: number) {
+  updateRectangleTextValue(
+    rectangle: HTMLDivElement,
+    value: number,
+    renderer: Renderer2
+  ) {
     if (rectangle.firstChild) {
-      this.renderer.removeChild(rectangle, rectangle.firstChild);
+      renderer.removeChild(rectangle, rectangle.firstChild);
     }
-    const valueSpan = this.renderer.createElement('span');
-    this.renderer.addClass(valueSpan, 'value');
+    const valueSpan = renderer.createElement('span');
+    renderer.addClass(valueSpan, 'value');
     (<HTMLSpanElement>valueSpan).innerText = String(value);
-    this.renderer.appendChild(rectangle, valueSpan);
-  }
-
-  animateRectangles(element: number[]) {
-    if (!element) {
-      return;
-    }
-    for (let j = 0; j < element.length; j++) {
-      const rectDiv = this.rectangleDivsList[j];
-      const value = element[j];
-      this.animateRectangle(rectDiv, value);
-      this.updateRectangleTextValue(rectDiv, value);
-    }
+    renderer.appendChild(rectangle, valueSpan);
   }
 
   async insertionSortGrowAnimation(
     animation: SortingAnimation,
     rectDivs: HTMLDivElement[],
     maxValue: number,
-    tick: number
+    tick: number,
+    renderer: Renderer2
   ) {
     if (animation.sortType !== 'insertion-sort') return;
     // const index1 = animation.currentIndex;
@@ -299,14 +309,15 @@ export class SortingComponent implements AfterViewInit {
     // this.commitNormalizedHeightToRect(rectDivs[index1], nextHeight1);
     // this.updateRectangleTextValue(rectDivs[index1], nextHeight1);
     this.commitNormalizedHeightToRect(rectDivs[index2], nextHeight2);
-    this.updateRectangleTextValue(rectDivs[index2], nextHeight2);
+    this.updateRectangleTextValue(rectDivs[index2], nextHeight2, renderer);
   }
 
   async insertionSortSettleAnimation(
     animation: SortingAnimation,
     rectDivs: HTMLDivElement[],
     maxValue: number,
-    tick: number
+    tick: number,
+    renderer: Renderer2
   ) {
     if (animation.sortType !== 'insertion-sort') return;
     await animateRectangle(
@@ -324,25 +335,31 @@ export class SortingComponent implements AfterViewInit {
     );
     this.updateRectangleTextValue(
       rectDivs[animation.iterationIndex],
-      animation.listStatus[animation.iterationIndex]
+      animation.listStatus[animation.iterationIndex],
+      renderer
     );
   }
 
-  bubbleSortSwapRectanglesAnimation(element: number[]) {
+  bubbleSortSwapRectanglesAnimation(
+    element: number[],
+    tick: number,
+    renderer: Renderer2
+  ) {
     if (!element) {
       return;
     }
     for (let j = 0; j < element.length; j++) {
       const rectDiv = this.rectangleDivsList[j];
       const value = element[j];
-      this.bubbleSortSwapRectangleAnimation(rectDiv, value);
-      this.updateRectangleTextValue(rectDiv, value);
+      this.bubbleSortSwapRectangleAnimation(rectDiv, value, tick);
+      this.updateRectangleTextValue(rectDiv, value, renderer);
     }
   }
 
   async bubbleSortSwapRectangleAnimation(
     rectDiv: HTMLDivElement,
-    value: number
+    value: number,
+    tick: number
   ) {
     if (!this.maxValue) return;
     const hasSameHeight = hasSameValue(rectDiv, value);
@@ -353,7 +370,7 @@ export class SortingComponent implements AfterViewInit {
       this.maxValue,
       this.containerHeight,
       this.swapColor,
-      this.animationSpeed
+      tick
     );
     this.commitNormalizedHeightToRect(rectDiv, value);
   }
@@ -368,7 +385,7 @@ export class SortingComponent implements AfterViewInit {
   }
 
   //this function is for the bubblesort
-  async animateRectangle(rectDiv: HTMLDivElement, value: number) {
+  async animateRectangle(rectDiv: HTMLDivElement, value: number, tick: number) {
     if (!this.maxValue) return;
     await animateRectangle(
       rectDiv,
@@ -388,7 +405,7 @@ export class SortingComponent implements AfterViewInit {
     });
   }
 
-  setHeights(divs: HTMLDivElement[], heights: number[]) {
+  setHeights(divs: HTMLDivElement[], heights: number[], renderer: Renderer2) {
     if (!this.maxValue) return;
     divs.forEach((d, i) => {
       this.renderer.setStyle(
@@ -401,7 +418,7 @@ export class SortingComponent implements AfterViewInit {
         )}px`
       );
       this.setValueAttribute(d, heights[i]);
-      this.updateRectangleTextValue(d, heights[i]);
+      this.updateRectangleTextValue(d, heights[i], renderer);
     });
   }
 

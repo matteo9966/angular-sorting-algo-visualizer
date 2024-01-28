@@ -1,23 +1,17 @@
-<div class="sorting-grid">
-  @if(sortingType){
 
-  <app-sorting
-    
-    [animationQueue]="animationQueue"
-    [sortingAlgorithm]="sortingType"
-  ></app-sorting>
-  }
-  <!-- <app-sorting [sortingSequence]="sequence"></app-sorting> -->
-</div>
-<div class="actions">
+<!-- <div class="actions">
   <button (click)="centralizedPlay()">CENTRALIZED PLAY</button>
   <button (click)="centralizedPause()">CENTRALIZED PAUSE</button>
   <button (click)="centralizedReset()">CENTRALIZED RESET</button>
   <button (click)="createSequence()">CREATE SEQUENCE</button>
   <button (click)="play()">PLAY</button>
-  <button (click)="pause()">PAUSE</button>
-  <button (click)="createBubbleSortSequence()">CREATE BUBBLE SORT QUEUE</button>
-  <button (click)="createInsertionSortSequence()">
-    CREATE INSERTION SORT QUEUE
-  </button>
-</div>
+  CREATE INSERTION SORT QUEUE
+</button>
+</div> -->
+
+<!-- <app-bubble-sorting [animationQueue]="animationQueue"></app-bubble-sorting> -->
+<app-insertion-sorting [animationQueue]="animationQueue"></app-insertion-sorting>
+<button (click)="play()">PLAY</button>
+<button (click)="pause()">PAUSE</button>
+<button (click)="createBubbleSortSequence()">CREATE BUBBLE SORT QUEUE</button>
+<button (click)="createInsertionSortSequence()">CREATE INSERTION SORT ANIMATION</button>

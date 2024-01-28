@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Actions } from '../types/actions';
+import { Actions } from '../../types/actions';
 // import { bubbleSortRecursive, } from '@matteo-l-tommasi/sorting-algorithms';
 import { TickService } from './tick.service';
 import {
