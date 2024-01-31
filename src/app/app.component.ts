@@ -1,14 +1,20 @@
 import { Component, Renderer2, inject } from '@angular/core';
-
-import { SortingComponent } from './components/sorting/sorting.component';
 import { SortingService } from './core/services/sorting.service';
-import { AnimationQueue,BubbleSortAnimation,InsertionSortAnimation,SortingAnimation } from '@matteo-l-tommasi/sorting-algorithms';
+import {
+  AnimationQueue,
+  SortingAnimation,
+} from '@matteo-l-tommasi/sorting-algorithms';
 import { BubbleSortingComponent } from './components/bubble-sorting/bubble-sorting.component';
 import { InsertionSortingComponent } from './components/insertion-sorting/insertion-sorting.component';
+import { SelectionSortingComponent } from './components/selection-sorting/selection-sorting.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ SortingComponent,BubbleSortingComponent,InsertionSortingComponent],
+  imports: [
+    BubbleSortingComponent,
+    InsertionSortingComponent,
+    SelectionSortingComponent,
+  ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
@@ -48,7 +54,7 @@ export class AppComponent {
   bubbleSortAnimationQueue: AnimationQueue = [];
   insetionSortAnimationQueue: AnimationQueue = [];
 
-  animationQueue: BubbleSortAnimation[] | InsertionSortAnimation[] = [];
+  animationQueue: AnimationQueue = [];
   sortingType: SortingAnimation['sortType'] | null = null;
   createBubbleSortSequence() {
     this.animationQueue = this.sortingService.createBubbleSortAnimation();
@@ -59,5 +65,11 @@ export class AppComponent {
     this.animationQueue = this.sortingService.createInsertionSortAnimation();
     console.log(this.animationQueue);
     this.sortingType = 'insertion-sort';
+  }
+
+  createSelectionSortSequence() {
+    this.animationQueue = this.sortingService.createSelectionSortAnimation();
+    this.sortingType = 'selection-sort';
+    console.log(this.animationQueue);
   }
 }

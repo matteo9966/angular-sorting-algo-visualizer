@@ -20,7 +20,6 @@ export abstract class SortAnimation {
 
   @Input()
   set animationQueue(animationQueue: AnimationQueue) {
-    console.log(animationQueue);
     this.#animationQueue = animationQueue;
     this.maxValue = Math.max(...(animationQueue[0]?.listStatus || []));
     this.rectangleDivsList = this.createRectangles(
@@ -102,7 +101,6 @@ export abstract class SortAnimation {
 
   initRectangles(values: number[], renderer: Renderer2) {
     this.rectangleDivsList = this.createRectangles(values, renderer);
-    console.log(this.rectangleDivsList);
   }
 
   createRectangles(values: number[], renderer: Renderer2) {
@@ -145,6 +143,9 @@ export abstract class SortAnimation {
     this.renderer.createElement('div');
   }
 
+  /**
+   * @description removes al background colors from  the rectangles
+   */
   resetDefaultColor() {
     this.rectangleDivsList.forEach((div) => {
       this.renderer.setStyle(div, 'background', this.defaultRectangleColor);

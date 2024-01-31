@@ -6,6 +6,7 @@ import { TickService } from './tick.service';
 import {
   bubbleSort,
   insertionSort,
+  selectionSort,
 } from '@matteo-l-tommasi/sorting-algorithms';
 
 @Injectable({
@@ -42,7 +43,7 @@ export class SortingService {
 
   sequence = signal<number[][]>([]);
   insertSequence(list: number[]) {}
-  createSequence(size = 30, min = 1, max = 200) {
+  createSequence(size = 7, min = 1, max = 70) {
     const random: number[] = [];
     for (let i = 0; i < size; i++) {
       random.push(randomInteger(min, max));
@@ -58,7 +59,11 @@ export class SortingService {
   createInsertionSortAnimation() {
     const sequence = this.createSequence();
     return insertionSort(sequence);
-    // return mock
+  }
+
+  createSelectionSortAnimation() {
+    const sequence = this.createSequence();
+    return selectionSort(sequence);
   }
 }
 

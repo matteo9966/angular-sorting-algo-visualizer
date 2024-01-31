@@ -4,8 +4,6 @@ import {
   Renderer2,
   ViewContainerRef,
 } from '@angular/core';
-import { SortingComponent } from '../sorting/sorting.component';
-import { SortComponent } from '../sortAnimation/sort.component';
 import { SortAnimation } from 'src/app/components/sortAnimation/SortAnimation.component';
 import { AnimationQueue } from '@matteo-l-tommasi/sorting-algorithms';
 import { SortingService } from 'src/app/core/services/sorting.service';
@@ -16,16 +14,15 @@ import { hasSameValue } from 'src/app/utils/hasSameValue';
 @Component({
   selector: 'app-bubble-sorting',
   standalone: true,
-  imports: [],
   templateUrl: './bubble-sorting.component.html',
   styleUrl: './bubble-sorting.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BubbleSortingComponent extends SortAnimation {
   constructor(
-    private _renderer2: Renderer2,
-    private _sorting: SortingService,
-    private _viewContainer: ViewContainerRef
+     _renderer2: Renderer2,
+     _sorting: SortingService,
+     _viewContainer: ViewContainerRef
   ) {
     super(_renderer2, _sorting, _viewContainer);
   }
