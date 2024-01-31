@@ -1,22 +1,32 @@
 /* You can add global styles to this file, and also import other style files */
-  .sorting-container {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    
-    border: 1px solid black;
-    align-items: flex-end;
-    padding: 10px;
-  }
-  
-  .rect {
-    border: 1px solid red;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    flex-grow:1;
-  }
-  
-  .value{
-    font-weight: bold;
-  }
+:root {
+  --swap-color: rgb(141, 214, 104);
+  --iteration-color: rgb(85, 85, 208);
+  --border-color: rgb(24, 9, 48);
+  --default-rectangle-color: rgb(189, 189, 189);
+  //selection-sort
+  --min-index-color: orangered;
+  --sort-index-color: rgb(0, 166, 144);
+}
+.sorting-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  height: 200px;
+  border: 1px solid black;
+  align-items: flex-end;
+  padding: 10px;
+}
+
+.rect {
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex-grow: 1;
+  border-radius: 20px 20px 0 0;
+}
+
+.value {
+  font-weight: bold;
+}

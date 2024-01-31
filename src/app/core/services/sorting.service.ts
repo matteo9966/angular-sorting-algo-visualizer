@@ -4,10 +4,13 @@ import { Actions } from '../../types/actions';
 // import { bubbleSortRecursive, } from '@matteo-l-tommasi/sorting-algorithms';
 import { TickService } from './tick.service';
 import {
+  BubbleSortAnimation,
+  InsertionSortAnimation,
   bubbleSort,
   insertionSort,
   selectionSort,
 } from '@matteo-l-tommasi/sorting-algorithms';
+import { SelectionSortAnimation } from '@matteo-l-tommasi/sorting-algorithms/lib/es5/algorithms/selection-sort';
 
 @Injectable({
   providedIn: 'root',
@@ -15,9 +18,20 @@ import {
 export class SortingService {
   private tickService = inject(TickService);
   tick$ = this.tickService.tick$;
-
+  sortingSequence: number[] = [];
+  bubbleSortAnimationQueue: BubbleSortAnimation[] = [];
+  selectionSortAnimationQueue: SelectionSortAnimation[] = [];
+  insertionSortAnimationQueue: InsertionSortAnimation[] = [];
+  value = { val: 10 };
+  val=10
   private sortingStatus$$ = new BehaviorSubject<Actions>('pause');
   constructor() {}
+
+  changeValue() {
+    this.value = { val: this.val};
+    this.val++;
+    console.log(this.val,this.value)
+  }
 
   status$ = this.sortingStatus$$.asObservable();
 
@@ -43,7 +57,7 @@ export class SortingService {
 
   sequence = signal<number[][]>([]);
   insertSequence(list: number[]) {}
-  createSequence(size = 7, min = 1, max = 70) {
+  createSequence(size = 20, min = 10, max = 99) {
     const random: number[] = [];
     for (let i = 0; i < size; i++) {
       random.push(randomInteger(min, max));
@@ -51,19 +65,34 @@ export class SortingService {
     return random;
   }
 
-  createBubbleSortAnimation() {
-    const sequence = this.createSequence();
-    return bubbleSort(sequence);
+  createBubbleSortAnimation(sortingSequence: number[]) {
+    return bubbleSort(sortingSequence);
   }
 
-  createInsertionSortAnimation() {
-    const sequence = this.createSequence();
-    return insertionSort(sequence);
+  createInsertionSortAnimation(sortingSequence: number[]) {
+    return insertionSort(sortingSequence);
   }
 
-  createSelectionSortAnimation() {
-    const sequence = this.createSequence();
-    return selectionSort(sequence);
+  createSelectionSortAnimation(sortingSequence: number[]) {
+    return selectionSort(sortingSequence);
+  }
+
+  createSortingAnimation() {
+    this.sortingSequence = this.createSequence();
+    this.bubbleSortAnimationQueue = this.createBubbleSortAnimation(
+      [...this.sortingSequence]
+    );
+    this.insertionSortAnimationQueue = this.createInsertionSortAnimation(
+      [...this.sortingSequence]
+    );
+    this.selectionSortAnimationQueue = this.createSelectionSortAnimation(
+     [...this.sortingSequence]
+    );
+    console.log(
+      this.bubbleSortAnimationQueue,
+      this.insertionSortAnimationQueue,
+      this.selectionSortAnimationQueue
+    );
   }
 }
 

@@ -18,7 +18,6 @@ import { hasSameValue } from 'src/app/utils/hasSameValue';
   imports: [],
   templateUrl: './selection-sorting.component.html',
   styleUrl: './selection-sorting.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SelectionSortingComponent extends SortAnimation {
   constructor(
@@ -28,6 +27,9 @@ export class SelectionSortingComponent extends SortAnimation {
   ) {
     super(renderer, sortingService, viewContainer);
   }
+  sortIndexColor = 'var(--sort-index-color)';
+  minindexColor = 'var(--min-index-color)';
+  
   override animate(
     tick: number,
     animationQueue: AnimationQueue,
@@ -41,7 +43,6 @@ export class SelectionSortingComponent extends SortAnimation {
     if (!animationItem) {
       this.executing = false;
       this.queueIndex = 0;
-      this.sortingService.pause();
       return;
     }
     this.executing = true;
@@ -65,7 +66,7 @@ export class SelectionSortingComponent extends SortAnimation {
     this.queueIndex++;
   }
 
-  sortIndexColor = 'red';
+
 
   highlightCurrentSortIndex(animationItem: SelectionSortAnimation) {
     const sortDiv = this.rectangleDivsList[animationItem.sortedIndex];
@@ -81,7 +82,7 @@ export class SelectionSortingComponent extends SortAnimation {
     ).play();
   }
 
-  minindexColor = 'magenta';
+ 
   highightMinIndex(animationItem: SelectionSortAnimation) {
     this.renderer.setStyle(
       this.rectangleDivsList[animationItem.minIndex],

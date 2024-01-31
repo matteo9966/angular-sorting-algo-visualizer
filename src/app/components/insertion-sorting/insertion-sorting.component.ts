@@ -40,7 +40,6 @@ export class InsertionSortingComponent extends SortAnimation {
     if (!animationItem) {
       this.executing = false;
       this.queueIndex = 0;
-      this.sortingService.pause();
       return;
     }
     this.executing = true;

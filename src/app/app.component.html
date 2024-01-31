@@ -1,4 +1,3 @@
-
 <!-- <div class="actions">
   <button (click)="centralizedPlay()">CENTRALIZED PLAY</button>
   <button (click)="centralizedPause()">CENTRALIZED PAUSE</button>
@@ -8,12 +7,24 @@
   CREATE INSERTION SORT QUEUE
 </button>
 </div> -->
-
-<!-- <app-bubble-sorting [animationQueue]="animationQueue"></app-bubble-sorting> -->
-<!-- <app-insertion-sorting [animationQueue]="animationQueue"></app-insertion-sorting> -->
-<app-selection-sorting [animationQueue]="animationQueue"></app-selection-sorting>
+<h3>bubble sort</h3>
+<app-bubble-sorting
+  [animationQueue]="bubbleSortAnimationQueue"
+></app-bubble-sorting>
+<br>
+<h3>insertion sort</h3>
+<app-insertion-sorting
+  [animationQueue]="insetionSortAnimationQueue"
+></app-insertion-sorting>
+<br>
+<h3>selection sort</h3>
+<app-selection-sorting
+  [animationQueue]="selectionSortAnimationQueue"
+></app-selection-sorting>
 <button (click)="play()">PLAY</button>
 <button (click)="pause()">PAUSE</button>
 <!-- <button (click)="createBubbleSortSequence()">CREATE BUBBLE SORT QUEUE</button> -->
 <!-- <button (click)="createInsertionSortSequence()">CREATE INSERTION SORT ANIMATION</button> -->
-<button (click)="createSelectionSortSequence()">CREATE SELECTION SORT ANIMATION</button>
+<!-- <button (click)="createSelectionSortSequence()">CREATE SELECTION SORT ANIMATION</button> -->
+<button (click)="createAnimations()">CREATE ANIMATIONS</button>
+<button (click)="changeValue()">{{ value.val }}</button>

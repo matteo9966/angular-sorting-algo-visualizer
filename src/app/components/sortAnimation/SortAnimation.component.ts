@@ -9,14 +9,12 @@ import { SortingService } from '../../core/services/sorting.service';
   standalone: true,
   imports: [],
   template: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export abstract class SortAnimation {
-  @Input() containerHeight: number = 500;
-  @Input() defaultRectangleColor = 'white';
-  @Input() swapColor = 'magenta';
-  @Input() iterationColor = 'green';
-  @Input() animationSpeed = 300;
+  @Input() containerHeight: number = 180;
+  defaultRectangleColor = 'var(--default-rectangle-color)';
+  swapColor = 'var(--swap-color)';
+  iterationColor = 'var(--iteration-color)';
 
   @Input()
   set animationQueue(animationQueue: AnimationQueue) {

@@ -41,14 +41,16 @@ export class BubbleSortingComponent extends SortAnimation {
     this.executing = true;
     switch (animationItem.animationFn) {
       case 'itarationAnimation':
+        this.resetDefaultColor();
         this.iterationRectangleAnimation(
           this.rectangleDivsList,
           animationItem.currentIndex,
           tick,
           this.iterationColor
-        ).play();
-        break;
-      case 'swapAnimation':
+          ).play();
+          break;
+          case 'swapAnimation':
+        this.resetDefaultColor();
         this.bubbleSortSwapRectanglesAnimation(
           animationItem.listStatus,
           tick,

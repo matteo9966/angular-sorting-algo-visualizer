@@ -21,7 +21,12 @@ import { SelectionSortingComponent } from './components/selection-sorting/select
 export class AppComponent {
   title = 'angular-sorting-algo-visualizer';
   sortingService = inject(SortingService);
-
+  value = this.sortingService.value;
+  changeValue() {
+    console.log(this.value, this.sortingService.value);
+    this.sortingService.changeValue();
+    // console.log(this.value.val);
+  }
   animate() {
     // this.renderer.e
   }
@@ -53,23 +58,29 @@ export class AppComponent {
 
   bubbleSortAnimationQueue: AnimationQueue = [];
   insetionSortAnimationQueue: AnimationQueue = [];
+  selectionSortAnimationQueue: AnimationQueue = [];
 
   animationQueue: AnimationQueue = [];
   sortingType: SortingAnimation['sortType'] | null = null;
   createBubbleSortSequence() {
-    this.animationQueue = this.sortingService.createBubbleSortAnimation();
+    // this.animationQueue = this.sortingService.createBubbleSortAnimation();
     this.sortingType = 'bubble-sort';
   }
 
   createInsertionSortSequence() {
-    this.animationQueue = this.sortingService.createInsertionSortAnimation();
-    console.log(this.animationQueue);
+    // this.animationQueue = this.sortingService.createInsertionSortAnimation();
     this.sortingType = 'insertion-sort';
   }
 
   createSelectionSortSequence() {
-    this.animationQueue = this.sortingService.createSelectionSortAnimation();
+    // this.animationQueue = this.sortingService.createSelectionSortAnimation();
     this.sortingType = 'selection-sort';
-    console.log(this.animationQueue);
+  }
+
+  createAnimations() {
+    this.sortingService.createSortingAnimation();
+    this.bubbleSortAnimationQueue=this.sortingService.bubbleSortAnimationQueue;
+    this.insetionSortAnimationQueue=this.sortingService.insertionSortAnimationQueue;
+    this.selectionSortAnimationQueue=this.sortingService.selectionSortAnimationQueue;
   }
 }
