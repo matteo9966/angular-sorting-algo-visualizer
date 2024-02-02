@@ -1,8 +1,14 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  filter,
+  interval,
+  map,
+  Subject,
+  Subscription,
+} from 'rxjs';
 import { Actions } from '../../types/actions';
-// import { bubbleSortRecursive, } from '@matteo-l-tommasi/sorting-algorithms';
-import { TickService } from './tick.service';
 import {
   BubbleSortAnimation,
   InsertionSortAnimation,
@@ -16,31 +22,45 @@ import { SelectionSortAnimation } from '@matteo-l-tommasi/sorting-algorithms/lib
   providedIn: 'root',
 })
 export class SortingService {
-  private tickService = inject(TickService);
-  tick$ = this.tickService.tick$;
+  #tick$$ = new Subject<number>();
   sortingSequence: number[] = [];
   bubbleSortAnimationQueue: BubbleSortAnimation[] = [];
   selectionSortAnimationQueue: SelectionSortAnimation[] = [];
   insertionSortAnimationQueue: InsertionSortAnimation[] = [];
-  value = { val: 10 };
-  val=10
   private sortingStatus$$ = new BehaviorSubject<Actions>('pause');
-  constructor() {}
-
-  changeValue() {
-    this.value = { val: this.val};
-    this.val++;
-    console.log(this.val,this.value)
-  }
-
+  playing = false;
+  intervalSub: Subscription | null = null;
   status$ = this.sortingStatus$$.asObservable();
 
+  tick$ = combineLatest([this.#tick$$, this.sortingStatus$$]).pipe(
+    filter(([_, status]) => status !== 'pause'),
+
+  );
+
+  private playTick(timeMs: number) {
+    if (this.playing) return;
+    this.playing = true;
+
+    this.intervalSub = interval(timeMs)
+      .pipe(map(() => timeMs))
+      .subscribe((t) => this.#tick$$.next(t));
+  }
+
+  private pauseTick() {
+    if (!this.playing) return;
+    this.intervalSub?.unsubscribe();
+    this.intervalSub = null;
+    this.playing = false;
+  }
+
   play() {
-    this.tickService.play(500);
+    this.playTick(500);
+    this.playSorting();
   }
 
   pause() {
-    this.tickService.pause();
+    this.pauseTick();
+    this.pauseSorting();
   }
 
   playSorting() {
@@ -52,11 +72,10 @@ export class SortingService {
   }
 
   resetSorting() {
+    this.pauseTick();
     this.sortingStatus$$.next('reset');
   }
 
-  sequence = signal<number[][]>([]);
-  insertSequence(list: number[]) {}
   createSequence(size = 20, min = 10, max = 99) {
     const random: number[] = [];
     for (let i = 0; i < size; i++) {
@@ -79,20 +98,15 @@ export class SortingService {
 
   createSortingAnimation() {
     this.sortingSequence = this.createSequence();
-    this.bubbleSortAnimationQueue = this.createBubbleSortAnimation(
-      [...this.sortingSequence]
-    );
-    this.insertionSortAnimationQueue = this.createInsertionSortAnimation(
-      [...this.sortingSequence]
-    );
-    this.selectionSortAnimationQueue = this.createSelectionSortAnimation(
-     [...this.sortingSequence]
-    );
-    console.log(
-      this.bubbleSortAnimationQueue,
-      this.insertionSortAnimationQueue,
-      this.selectionSortAnimationQueue
-    );
+    this.bubbleSortAnimationQueue = this.createBubbleSortAnimation([
+      ...this.sortingSequence,
+    ]);
+    this.insertionSortAnimationQueue = this.createInsertionSortAnimation([
+      ...this.sortingSequence,
+    ]);
+    this.selectionSortAnimationQueue = this.createSelectionSortAnimation([
+      ...this.sortingSequence,
+    ]);
   }
 }
 

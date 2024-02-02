@@ -3,6 +3,7 @@ import { AnimationQueue } from '@matteo-l-tommasi/sorting-algorithms';
 import { calculateNormailizedHeight } from 'src/app/utils/calculateNormalizedHeight';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { SortingService } from '../../core/services/sorting.service';
+import { Actions } from 'src/app/types/actions';
 
 @Component({
   selector: 'sort-animation',
@@ -15,10 +16,11 @@ export abstract class SortAnimation {
   defaultRectangleColor = 'var(--default-rectangle-color)';
   swapColor = 'var(--swap-color)';
   iterationColor = 'var(--iteration-color)';
-
+  completed=false;
   @Input()
   set animationQueue(animationQueue: AnimationQueue) {
     this.#animationQueue = animationQueue;
+    this.completed=false;
     this.maxValue = Math.max(...(animationQueue[0]?.listStatus || []));
     this.rectangleDivsList = this.createRectangles(
       animationQueue[0]?.listStatus || [],
@@ -36,16 +38,27 @@ export abstract class SortAnimation {
   rectangleDivsList: HTMLDivElement[] = [];
   maxValue!: number;
   container!: HTMLDivElement;
-
+  status: Actions | undefined;
   constructor(
     protected renderer: Renderer2,
     protected sortingService: SortingService,
     protected viewContainerRef: ViewContainerRef
   ) {
-    this.sortingService.tick$.subscribe((tick) => {
+    this.sortingService.tick$.subscribe(([tick, status]) => {
+      if (status === 'reset') {
+        this.completed=false;
+        this.queueIndex = 0;
+        this.initRectangles(
+          this.animationQueue[0]?.listStatus || [],
+          this.renderer
+        );
+      }
+      if (this.queueIndex === this.animationQueue.length) {
+        this.completed=true;
+        return;
+      }
       this.animate(tick, this.animationQueue, renderer);
     });
-
     this.initContainer();
   }
 
