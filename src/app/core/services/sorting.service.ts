@@ -76,7 +76,7 @@ export class SortingService {
     this.sortingStatus$$.next('reset');
   }
 
-  createSequence(size = 20, min = 10, max = 99) {
+  createSequence(size = 5, min = 10, max = 99) {
     const random: number[] = [];
     for (let i = 0; i < size; i++) {
       random.push(randomInteger(min, max));

@@ -10,6 +10,7 @@ import { SortingService } from 'src/app/core/services/sorting.service';
 import { iterationAnimation } from 'src/app/utils/animations/iterationAnimation';
 import { animateRectangle } from 'src/app/utils/animations/swapAnimation';
 import { hasSameValue } from 'src/app/utils/hasSameValue';
+import { completedAnimation } from 'src/app/utils/animations/completedAnimation';
 
 @Component({
   selector: 'app-bubble-sorting',
@@ -20,9 +21,9 @@ import { hasSameValue } from 'src/app/utils/hasSameValue';
 })
 export class BubbleSortingComponent extends SortAnimation {
   constructor(
-     _renderer2: Renderer2,
-     _sorting: SortingService,
-     _viewContainer: ViewContainerRef
+    _renderer2: Renderer2,
+    _sorting: SortingService,
+    _viewContainer: ViewContainerRef
   ) {
     super(_renderer2, _sorting, _viewContainer);
   }
@@ -33,11 +34,22 @@ export class BubbleSortingComponent extends SortAnimation {
     renderer: Renderer2
   ) {
     const animationItem = animationQueue[this.queueIndex];
-    if (!animationItem) {
+    // if (
+    //   this.queueIndex > 0 &&
+    //   this.queueIndex === this.animationQueue.length &&
+    //   !this.completed
+    // ) {
+    //   this.completed = true;
+    //   console.log('completed!!!!')
+    //   completedAnimation(this.rectangleDivsList, 'green', tick);
+    // }
+
+    if (!animationItem || this.completed) {
       this.executing = false;
       this.queueIndex = 0;
       return;
     }
+
     this.executing = true;
     switch (animationItem.animationFn) {
       case 'itarationAnimation':
@@ -47,9 +59,9 @@ export class BubbleSortingComponent extends SortAnimation {
           animationItem.currentIndex,
           tick,
           this.iterationColor
-          ).play();
-          break;
-          case 'swapAnimation':
+        ).play();
+        break;
+      case 'swapAnimation':
         this.resetDefaultColor();
         this.bubbleSortSwapRectanglesAnimation(
           animationItem.listStatus,

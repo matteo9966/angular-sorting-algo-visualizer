@@ -4,6 +4,7 @@ import { calculateNormailizedHeight } from 'src/app/utils/calculateNormalizedHei
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { SortingService } from '../../core/services/sorting.service';
 import { Actions } from 'src/app/types/actions';
+import { completedAnimation } from 'src/app/utils/animations/completedAnimation';
 
 @Component({
   selector: 'sort-animation',
@@ -16,11 +17,11 @@ export abstract class SortAnimation {
   defaultRectangleColor = 'var(--default-rectangle-color)';
   swapColor = 'var(--swap-color)';
   iterationColor = 'var(--iteration-color)';
-  completed=false;
+  completed = false;
   @Input()
   set animationQueue(animationQueue: AnimationQueue) {
     this.#animationQueue = animationQueue;
-    this.completed=false;
+    this.completed = false;
     this.maxValue = Math.max(...(animationQueue[0]?.listStatus || []));
     this.rectangleDivsList = this.createRectangles(
       animationQueue[0]?.listStatus || [],
@@ -46,15 +47,20 @@ export abstract class SortAnimation {
   ) {
     this.sortingService.tick$.subscribe(([tick, status]) => {
       if (status === 'reset') {
-        this.completed=false;
+        this.completed = false;
         this.queueIndex = 0;
         this.initRectangles(
           this.animationQueue[0]?.listStatus || [],
           this.renderer
         );
       }
-      if (this.queueIndex === this.animationQueue.length) {
-        this.completed=true;
+      if (
+        this.queueIndex > 0 &&
+        this.queueIndex === this.animationQueue.length &&
+        !this.completed
+      ) {
+        completedAnimation(this.rectangleDivsList, 'green', tick);
+        this.completed = true;
         return;
       }
       this.animate(tick, this.animationQueue, renderer);
@@ -63,7 +69,17 @@ export abstract class SortAnimation {
   }
 
   initContainer() {
-    this.container = this.viewContainerRef.element.nativeElement;
+    const container = this.renderer.createElement('div');
+    this.container = container;
+
+    this.renderer.appendChild(
+      this.viewContainerRef.element.nativeElement,
+      container
+    );
+    this.renderer.addClass(
+      this.viewContainerRef.element.nativeElement,
+      'component-style'
+    );
     this.renderer.addClass(this.container, 'sorting-container');
   }
 

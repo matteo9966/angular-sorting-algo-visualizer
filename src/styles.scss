@@ -9,6 +9,7 @@
   --sort-index-color: rgb(0, 166, 144);
 }
 .sorting-container {
+  flex-grow: 1;
   display: flex;
   flex-direction: row;
   gap: 10px;
@@ -29,4 +30,10 @@
 
 .value {
   font-weight: bold;
+}
+
+
+.component-style{
+  display: flex;
+  width: 100%;
 }
