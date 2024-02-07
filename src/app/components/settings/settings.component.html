@@ -1,5 +1,54 @@
-<form>
-  {{ formValue().generatedSequence | json }}
+<form #form="ngForm" (ngSubmit)="generateRandomSequence($event)">
+  <div class="inputs">
+    <div class="input-wrap">
+      <label for="minimum">Min</label>
+      <input
+        class="input"
+        type="number"
+        name="minimum"
+        [ngModel]="formValue().minimum"
+      />
+    </div>
+    <div class="input-wrapper">
+      <label for="maximum">Max </label>
+      <input
+        class="input"
+        type="number"
+        name="maximum"
+        [ngModel]="formValue().maximum"
+      />
+    </div>
+    <div class="input-wrapper">
+      <label for="size">Size </label>
+      <input
+        class="input"
+        type="number"
+        name="size"
+        [ngModel]="formValue().size"
+      />
+    </div>
+    <button class="button" type="submit">CREATE SEQUENCE</button>
+  </div>
+  <span>Generated sequence:</span>
+  <textarea
+    class="textarea"
+    #sequenceArea="ngModel"
+    id=""
+    rows="2"
+    name="sequence"
+    [ngModel]="formValue().sequence"
+    placeholder="Insert a comma or space separated list of numbers..."
+    sequenceValidator
+    [separators]="SEPARATORS"
+    [maxSize]="MAX_SIZE"
+  ></textarea>
+  @if(!sequenceArea.valid && !sequenceArea.pristine){
+  <div class="error-message">
+    {{sequenceArea.errors?.['sequence']}}
+  </div>
+  }@else{
+    <div class="spacer"></div>
+  }
 
-  <button (click)="generateRandomSequence()">CREATE SEQUENCE</button>
+  <button type="button" class="button nogrow" disabled="!form.valid">GO!</button>
 </form>

@@ -1,3 +1,67 @@
 :host {
   display: block;
 }
+
+form{
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.inputs {
+  display: flex;
+  gap: 10px;
+  padding: 5px;
+  button{
+    flex:1
+  }
+}
+
+.input-wrapper{
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.input,.textarea {
+  padding: 5px;
+  border: 1px solid rgba(165, 161, 161, 0.725);
+  border-radius: 3px;
+  background: rgb(214, 214, 214);
+}
+
+.textarea{
+  width: 100%;
+  height: fit-content;
+  font-size: 30px;
+
+  &::placeholder{
+    color: rgba(0, 0, 0, 0.372);
+  }
+}
+
+.spacer,.error-message{
+  height: 30px;
+  color: red;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.button{
+  padding: 3px;
+  text-align: center;
+  text-transform: uppercase;
+  border: 1px solid gray;
+  border-radius: 3px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.596); 
+  
+  &:disabled{
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.nogrow{
+  flex-grow: 0;
+}
